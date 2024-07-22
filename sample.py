@@ -208,6 +208,7 @@ if __name__ == "__main__":
     set_lowvram_mode(opt.low_vram)
     version_dict = VERSION2SPECS[opt.version]
     model = init_model(version_dict)
+    #breakpoint()
     unique_keys = set([x.input_key for x in model.conditioner.embedders])
 
     sample_index = 0
@@ -221,12 +222,12 @@ if __name__ == "__main__":
 
         img_seq = list()
         for each_path in frame_list:
-            img = load_img(each_path, opt.height, opt.width)
+            img = load_img(each_path, opt.height, opt.width).bfloat16()
             img_seq.append(img)
         images = torch.stack(img_seq)
 
         value_dict = init_embedder_options(unique_keys)
-        cond_img = img_seq[0][None]
+        cond_img = img_seq[0][None].bfloat16()
         value_dict["cond_frames_without_noise"] = cond_img
         value_dict["cond_aug"] = opt.cond_aug
         value_dict["cond_frames"] = cond_img + opt.cond_aug * torch.randn_like(cond_img)

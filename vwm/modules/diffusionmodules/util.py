@@ -213,7 +213,7 @@ class SiLU(nn.Module):
 
 class GroupNorm32(nn.GroupNorm):
     def forward(self, x):
-        return super().forward(x.float()).type(x.dtype)
+        return super().forward(x.type(self.weight.dtype)).type(x.dtype)
 
 
 class CausalConv3d(nn.Conv3d):

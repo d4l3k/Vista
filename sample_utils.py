@@ -20,7 +20,7 @@ from vwm.util import default, instantiate_from_config
 def init_model(version_dict, load_ckpt=True):
     config = OmegaConf.load(version_dict["config"])
     model = load_model_from_config(config, version_dict["ckpt"] if load_ckpt else None)
-    return model
+    return model.bfloat16()
 
 
 lowvram_mode = False
@@ -41,7 +41,7 @@ def initial_model_load(model):
 
 
 def load_model(model):
-    model.cuda()
+    model.cuda().bfloat16()
 
 
 def unload_model(model):
@@ -102,7 +102,7 @@ def perform_save_locally(save_path, samples, mode, dataset_name, sample_index):
     if mode == "images":
         frame_count = 0
         for sample in samples:
-            sample = rearrange(sample.numpy(), "c h w -> h w c")
+            sample = rearrange(sample.float().numpy(), "c h w -> h w c")
             if "real" in save_path:
                 sample = 255.0 * (sample + 1.0) / 2.0
             else:
@@ -114,7 +114,7 @@ def perform_save_locally(save_path, samples, mode, dataset_name, sample_index):
             frame_count += 1
     elif mode == "grids":
         grid = torchvision.utils.make_grid(samples, nrow=int(samples.shape[0] ** 0.5))
-        grid = grid.transpose(0, 1).transpose(1, 2).squeeze(-1).numpy()
+        grid = grid.transpose(0, 1).transpose(1, 2).squeeze(-1).float().numpy()
         if "real" in save_path:
             grid = 255.0 * (grid + 1.0) / 2.0
         else:
@@ -124,7 +124,7 @@ def perform_save_locally(save_path, samples, mode, dataset_name, sample_index):
         #     return
         Image.fromarray(grid.astype(np.uint8)).save(grid_save_path)
     elif mode == "videos":
-        img_seq = rearrange(samples.numpy(), "t c h w -> t h w c")
+        img_seq = rearrange(samples.float().numpy(), "t c h w -> t h w c")
         if "real" in save_path:
             img_seq = 255.0 * (img_seq + 1.0) / 2.0
         else:
@@ -300,7 +300,7 @@ def do_sample(
     force_uc_zero_embeddings = default(force_uc_zero_embeddings, list())
     precision_scope = autocast
 
-    with torch.no_grad(), precision_scope(device), model.ema_scope("Sampling"):
+    with torch.no_grad(), precision_scope(device, dtype=torch.bfloat16), model.ema_scope("Sampling"):
         c, uc = get_condition(model, value_dict, num_frames, force_uc_zero_embeddings, device)
 
         load_model(model.first_stage_model)
@@ -368,7 +368,7 @@ def do_sample(
         unload_model(model.denoiser)
 
         load_model(model.first_stage_model)
-        samples_x = model.decode_first_stage(samples_z)
+        samples_x = model.decode_first_stage(samples_z.bfloat16())
         unload_model(model.first_stage_model)
 
         samples = torch.clamp((samples_x + 1.0) / 2.0, min=0.0, max=1.0)
