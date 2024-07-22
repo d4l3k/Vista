@@ -4,7 +4,6 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import kornia
 import numpy as np
-import open_clip
 import torch
 import torch.nn as nn
 from einops import rearrange, repeat
@@ -270,6 +269,8 @@ class FrozenOpenCLIPImageEmbedder(AbstractEmbModel):
             init_device=None
     ):
         super().__init__()
+        import open_clip
+
         model, _, _ = open_clip.create_model_and_transforms(
             arch,
             device=torch.device(default(init_device, "cpu")),

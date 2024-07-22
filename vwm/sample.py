@@ -6,7 +6,7 @@ from pytorch_lightning import seed_everything
 from torchvision import transforms
 
 import init_proj_path
-from sample_utils import *
+from vwm.sample_utils import *
 
 VERSION2SPECS = {
     "vwm": {
