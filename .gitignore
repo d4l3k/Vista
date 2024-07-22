@@ -166,3 +166,8 @@ logs/
 
 .DS_Store
 */.DS_Store
+
+annos/
+data/
+ckpts/
+output*
