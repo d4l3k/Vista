@@ -417,7 +417,7 @@ class ConcatTimestepEmbedderND(AbstractEmbModel):
             x = x[:, None]
         assert len(x.shape) == 2
         b, dims = x.shape[0], x.shape[1]
-        assert dims == self.num_features or self.num_features is None
+        assert dims == self.num_features or self.num_features is None, (dims, self.num_features)
         x = rearrange(x, "b d -> (b d)")
         emb = self.timestep(x)
         emb = rearrange(emb, "(b d) d2 -> b (d d2)", b=b, d=dims, d2=self.outdim)

@@ -12,7 +12,7 @@ from safetensors.torch import load_file as load_safetensors
 from torch import autocast
 from tqdm import tqdm
 
-from train import save_img_seq_to_video
+from vwm.train import save_img_seq_to_video
 from vwm.modules.diffusionmodules.sampling import EulerEDMSampler
 from vwm.util import default, instantiate_from_config
 

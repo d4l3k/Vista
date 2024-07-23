@@ -5,7 +5,7 @@ model:
     scale_factor: 0.18215
     disable_first_stage_autocast: True
     en_and_decode_n_samples_a_time: 14
-    num_frames: &num_frames 25
+    num_frames: &num_frames 10
 
     denoiser_config:
       target: vwm.modules.diffusionmodules.denoiser.Denoiser
